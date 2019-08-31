@@ -1,0 +1,9 @@
+{
+  "exec": "bash tests.bash",
+  "ext": "bash,bats",
+  "watch": [
+    ".",
+    ".tests"
+  ],
+  "delay": "1500"
+}

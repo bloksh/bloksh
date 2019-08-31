@@ -1,0 +1,4 @@
+# branch.oid 123abc
+# branch.head branch-name
+# branch.upstream origin/branch-name
+# branch.ab +2 -0
