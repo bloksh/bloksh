@@ -8,9 +8,9 @@
 
 It is recommended to use git, or you'll need to install/update _bloks_ manually. Which is unfortunate.
 
-* Clone this repository
-* Setup your `bloks.ini` file (see §The _bloks_)
-* `source bloksh.bash`
+* Clone this repository.
+* Setup your `bloks.ini` file (see §The _bloks_).
+* `source bloksh.bash`.
 * `bloksh_install` loops over the _bloks_, (re-)`.install` them, injects itself in `.bashrc`, restart console.
 
 ## Update
@@ -43,11 +43,16 @@ It is recommended to _not_ set the executable bit, in order to avoid accidental 
 
 These env variables are set and exported when sourcing/running the mentioned scripts:
 
-* `BLOKSH_NAME` - from `bloks.ini`
-* `BLOKSH_PATH` - the absolute path to the _blok_, corresponds to `bloks/$BLOKSH_NAME`
+* `BLOKSH_NAME` - from `bloks.ini`.
+* `BLOKSH_PATH` - the absolute path to the _blok_, corresponds to `bloks/$BLOKSH_NAME`.
 * `BLOKSH_SECRET_PATH` - the absolute path to the _blok_'s private space, corresponds to `secrets/$BLOKSH_NAME`. If your _blok_ plans to use it, it should `mkdir -p` its way in.
-* `BLOKSH_GIT_URL` - from `bloks.ini`
-* `BLOKSH_GIT_BRANCH` - from `bloks.ini`, after the #, if present
+* `BLOKSH_GIT_URL` - from `bloks.ini`.
+* `BLOKSH_GIT_BRANCH` - from `bloks.ini`, after the #, if present.
+
+From your `.bashrc` files you will have access to some juicy functions:
+
+* `sourceish <file>` - will source `<file>` if it is readable, relative paths are resolved from `$BLOKSH_PATH`.
+* `bloksh_add_to_path <dir>` - will add `<dir>` at the beginning of `$PATH`.
 
 ## Custom directories
 

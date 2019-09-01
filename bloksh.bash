@@ -6,7 +6,7 @@ BLOKSH_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 BLOKSH_ERRORS=()
 
-bloksh_msg () {
+_bloksh_msg () {
 	local level="$1"; shift
 	local color color_reset
 	if [[ -z $BLOKSH_NOCOLOR ]]; then
@@ -27,7 +27,7 @@ bloksh_msg () {
 
 _bloksh_show_errors () {
 	[[ ${#BLOKSH_ERRORS[@]} -gt 0 ]] &&
-		bloksh_msg error "Errors in bloks: ${BLOKSH_ERRORS[*]}"
+		_bloksh_msg error "Errors in bloks: ${BLOKSH_ERRORS[*]}"
 	BLOKSH_ERRORS=()
 }
 
@@ -55,33 +55,28 @@ _bloksh_loop () {
 	[[ -r $BLOKSH_BLOKS_INI ]] || return 3
 	local line_regex='^([^=[:space:];]+)(=([^[:space:];]*)){0,1}'
 	while IFS= read -r -u3 line || [[ $line ]]; do
-		bloksh_msg debug "Analyzing bloks.ini: '$line'"
+		_bloksh_msg debug "Analyzing bloks.ini: '$line'"
 		[[ $line =~ $line_regex ]] || continue
 		_bloksh_set_variables "${BASH_REMATCH[1]}" "${BASH_REMATCH[3]}"
-		bloksh_msg debug "Running '$*' for '$BLOKSH_NAME'"
+		_bloksh_msg debug "Running '$*' for '$BLOKSH_NAME'"
 		"$@" ||
 			BLOKSH_ERRORS+=("$BLOKSH_NAME")
 	done 3< "$BLOKSH_BLOKS_INI"
 	_bloksh_clean_variables
-	bloksh_msg debug "Loop completed."
+	_bloksh_msg debug "Loop completed."
 	_bloksh_show_errors
-}
-
-bloksh_source_all () {
-	# untested
-	_bloksh_loop sourceish "$1"
 }
 
 _bloksh_install_one () {
 	if ! [[ -d $BLOKSH_PATH ]]; then
-		bloksh_confirm "Download and install '$BLOKSH_GIT_URL'?" &&
+		_bloksh_confirm "Download and install '$BLOKSH_GIT_URL'?" &&
 		git clone --branch "$BLOKSH_GIT_BRANCH" --depth 1 --recurse-submodules "$BLOKSH_GIT_URL" "$BLOKSH_PATH" ||
 			return 1
 	fi
 	[ -r "$BLOKSH_PATH/.install" ] || return 0
-	bloksh_msg info 'Installing...'
+	_bloksh_msg info 'Installing...'
 	(cd "$BLOKSH_PATH" && exec "$SHELL" .install) &&
-		bloksh_msg info "Done"
+		_bloksh_msg info "Done"
 }
 
 bloksh_install () {
@@ -91,25 +86,25 @@ bloksh_install () {
 	local DOTFILES=(.bashrc)
 	for f in "${DOTFILES[@]}"; do
 		if ! grep -q "/bloksh.bash" "$HOME/$f" &>/dev/null; then
-			bloksh_msg info "Adding bloksh to '$f'..."
+			_bloksh_msg info "Adding bloksh to '$f'..."
 			echo "source '$BLOKSH_ROOT/bloksh.bash'" >> "$HOME/$f"
 			#TODO: add something like || echo "maybe you moved or removed bloksh"
 		fi
 	done
-	bloksh_restart_session
+	bloksh_restart
 }
 
-sourceish() {
+sourceish () {
 	local file="$1"
 	if [[ $BLOKSH_PATH ]] && [[ $file =~ ^[^/] ]]; then
 		if ! [[ -d $BLOKSH_PATH ]]; then
-			bloksh_msg error "Missing from filesystem. Try with bloksh_install, or remove this blok from bloks.ini."
+			_bloksh_msg error "Missing from filesystem. Try with bloksh_install, or remove this blok from bloks.ini."
 			return 1
 		fi
-		bloksh_msg debug "Assembling relative path to '$file'"
+		_bloksh_msg debug "Assembling relative path to '$file'"
 		file="$BLOKSH_PATH/$file"
 	fi
-	bloksh_msg debug "Sourcing '$file' if exists"
+	_bloksh_msg debug "Sourcing '$file' if exists"
 	if [[ -r $file ]]; then
 		# shellcheck source=/dev/null
 		source "$file"
@@ -156,7 +151,7 @@ _bloksh_git_update () {
 	local name="$2"
 	local expected_branch="$3"
 	if ! [[ -e $repository/.git ]]; then
-		bloksh_msg info "Unable to update: not a git repository"
+		_bloksh_msg info "Unable to update: not a git repository"
 		return
 	fi
 	local repository_status current_branch commits_behind
@@ -166,23 +161,23 @@ _bloksh_git_update () {
 	commits_behind="$(echo "$repository_status" | tail -1)"
 	case $repository_dirty_status in
 		3)
-			bloksh_msg error "Refuse to update: local repository has commits ahead"
+			_bloksh_msg error "Refuse to update: local repository has commits ahead"
 			return 1
 			;;
 		4)
-			bloksh_msg error "Refuse to update: working directory is not clean"
+			_bloksh_msg error "Refuse to update: working directory is not clean"
 			return 1
 			;;
 		0)
 			if [[ $expected_branch ]] && [[ $current_branch != "$expected_branch" ]]; then
-				bloksh_msg error "Refuse to update: branch '$current_branch' does not match bloks.ini"
+				_bloksh_msg error "Refuse to update: branch '$current_branch' does not match bloks.ini"
 				return 1
 			fi
 			if [[ $commits_behind -eq 0 ]]; then
-				bloksh_msg info "No updates found"
+				_bloksh_msg info "No updates found"
 				return 3 # no updates
 			fi
-			if bloksh_confirm "Update '$name' ($commits_behind commits)?"; then
+			if _bloksh_confirm "Update '$name' ($commits_behind commits)?"; then
 				#TODO: or maybe git -C "$repository" pull --rebase=false &&
 				git -C "$repository" reset --hard 'HEAD@{upstream}' &&
 				git -C "$repository" submodule update --init --recursive &&
@@ -198,11 +193,11 @@ bloksh_update () {
 	# untested
 	_bloksh_git_update "$BLOKSH_ROOT" bloksh
 	_bloksh_loop _bloksh_update_one
-	bloksh_restart_session
+	bloksh_restart
 }
 
 bloksh_add_to_path () {
-	bloksh_msg debug "Adding '$1' to PATH"
+	_bloksh_msg debug "Adding '$1' to PATH"
 	#TODO: remove trailing slash if it's there
 	#TODO: if present, remove, then re-add as first
 	case ":$PATH:" in
@@ -211,7 +206,7 @@ bloksh_add_to_path () {
 	esac
 }
 
-bloksh_confirm () {
+_bloksh_confirm () {
 	# untested
 	local default=${2:-y}
 	local answers='[Yn]'
@@ -228,9 +223,9 @@ bloksh_confirm () {
 	[[ $REPLY =~ ^[Yy]$ ]]
 }
 
-bloksh_restart_session () {
+bloksh_restart () {
 	# untested
-	bloksh_msg info "Starting a new shell..."
+	_bloksh_msg info "Starting a new shell..."
 	exec "$SHELL"
 }
 
@@ -240,7 +235,7 @@ if [[ ${BASH_SOURCE[0]} != "$0" ]]; then # sourced
 	[[ $1 == 'noop' ]] && return #NOTE: could be extended as an alternative to BLOKSH_SOURCED_BY
 	BLOKSH_SOURCED_BY="$(basename "${BASH_SOURCE[1]}")" # name of the file that sourced this file
 	if [[ $BLOKSH_SOURCED_BY ]]; then
-		bloksh_msg debug "'$(basename "${BASH_SOURCE[0]}")' sourced by '$BLOKSH_SOURCED_BY'"
-		bloksh_source_all "$BLOKSH_SOURCED_BY" # source homonym file for each blok
+		_bloksh_msg debug "'$(basename "${BASH_SOURCE[0]}")' sourced by '$BLOKSH_SOURCED_BY'"
+		_bloksh_loop sourceish "$BLOKSH_SOURCED_BY" # source homonym file for each blok
 	fi
 fi
