@@ -94,7 +94,7 @@ bloksh_install () {
 	bloksh_restart
 }
 
-sourceish () {
+bloksh_source () {
 	local file="$1"
 	if [[ $BLOKSH_PATH ]] && [[ $file =~ ^[^/] ]]; then
 		if ! [[ -d $BLOKSH_PATH ]]; then
@@ -236,6 +236,6 @@ if [[ ${BASH_SOURCE[0]} != "$0" ]]; then # sourced
 	BLOKSH_SOURCED_BY="$(basename "${BASH_SOURCE[1]}")" # name of the file that sourced this file
 	if [[ $BLOKSH_SOURCED_BY ]]; then
 		_bloksh_msg debug "'$(basename "${BASH_SOURCE[0]}")' sourced by '$BLOKSH_SOURCED_BY'"
-		_bloksh_loop sourceish "$BLOKSH_SOURCED_BY" # source homonym file for each blok
+		_bloksh_loop bloksh_source "$BLOKSH_SOURCED_BY" # source homonym file for each blok
 	fi
 fi

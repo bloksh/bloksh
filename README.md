@@ -51,7 +51,7 @@ These env variables are set and exported when sourcing/running the mentioned scr
 
 From your `.bashrc` files you will have access to some juicy functions:
 
-* `sourceish <file>` - will source `<file>` if it is readable, relative paths are resolved from `$BLOKSH_PATH`.
+* `bloksh_source <file>` - will source `<file>` if it is readable, relative paths are resolved from `$BLOKSH_PATH`.
 * `bloksh_add_to_path <dir>` - will add `<dir>` at the beginning of `$PATH`.
 
 ## Custom directories
