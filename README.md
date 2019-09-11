@@ -28,9 +28,12 @@ local_blok ; no need for git repository
 ; etc...
 ```
 
-Note: the order is kept when executing _bloks_.
+The order is kept when executing _bloks_.
 
-Run `bloksh_install` to download and install the _blok(s)_ added. Note that _bloks_ removed from `bloks.ini` are not deleted from filesystem, but they are not loaded anymore.
+Run `bloksh_install` to download and install the _blok(s)_ added.
+For a faster experience, only the selected branch is cloned, with a depth of 1. If you need to work with the repository, you may need to run something like `git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*" && git fetch --unshallow`.
+
+Note that _bloks_ removed from `bloks.ini` are not deleted from filesystem, but they are not loaded anymore.
 
 ### Anatomy
 
