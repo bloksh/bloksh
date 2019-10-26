@@ -91,23 +91,6 @@ bloksh_install () {
 	bloksh_restart
 }
 
-bloksh_source () {
-	local file="$1"
-	if [[ $BLOKSH_PATH ]] && [[ $file =~ ^[^/] ]]; then
-		if ! [[ -d $BLOKSH_PATH ]]; then
-			_bloksh_msg error "Missing from filesystem. Try with bloksh_install, or remove this blok from bloks.ini."
-			return 1
-		fi
-		_bloksh_msg debug "Assembling relative path to '$file'"
-		file="$BLOKSH_PATH/$file"
-	fi
-	_bloksh_msg debug "Sourcing '$file' if exists"
-	if [[ -r $file ]]; then
-		# shellcheck source=/dev/null
-		source "$file"
-	fi
-}
-
 _bloksh_update_one () {
 	# untested
 	_bloksh_git_update "$BLOKSH_PATH" "$BLOKSH_NAME" "$BLOKSH_GIT_BRANCH"
@@ -194,13 +177,37 @@ bloksh_update () {
 	bloksh_restart
 }
 
+_bloksh_resolve_path () {
+	local path="$1"
+	if [[ $BLOKSH_PATH ]] && [[ $path =~ ^[^/] ]]; then
+		if ! [[ -d $BLOKSH_PATH ]]; then
+			_bloksh_msg error "Missing from filesystem. Try with bloksh_install, or remove this blok from bloks.ini."
+			return 1
+		fi
+		_bloksh_msg debug "Assembling relative path to '$path'"
+		path="$BLOKSH_PATH/$path"
+	fi
+	echo "$path"
+}
+
+bloksh_source () {
+	local path
+	path="$(_bloksh_resolve_path "$1")" || return
+	_bloksh_msg debug "Sourcing '$path' if exists"
+	if [[ -r $path ]]; then
+		# shellcheck source=/dev/null
+		source "$path"
+	fi
+}
+
 bloksh_add_to_path () {
-	_bloksh_msg debug "Adding '$1' to PATH"
-	#TODO: remove trailing slash if it's there
+	local path
+	path="$(_bloksh_resolve_path "${1%/}")" || return
+	_bloksh_msg debug "Adding '$path' to PATH"
 	#TODO: if present, remove, then re-add as first
 	case ":$PATH:" in
-		*":$1:"*) :;; # already there
-		*) export PATH="$1:$PATH";;
+		*":$path:"*) :;; # already there
+		*) export PATH="$path:$PATH";;
 	esac
 }
 
