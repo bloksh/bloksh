@@ -188,6 +188,7 @@ _bloksh_git_update () {
 
 bloksh_update () {
 	# untested
+	_bloksh_clean_variables
 	_bloksh_git_update "$BLOKSH_ROOT" bloksh
 	_bloksh_loop _bloksh_update_one
 	bloksh_restart
@@ -222,6 +223,7 @@ _bloksh_confirm () {
 
 bloksh_restart () {
 	# untested
+	_bloksh_clean_variables
 	_bloksh_msg info "Restarting shell..."
 	exec "$SHELL"
 }
@@ -232,6 +234,7 @@ if [[ ${BASH_SOURCE[0]} != "$0" ]]; then # sourced
 	[[ $1 == 'noop' ]] && return #NOTE: could be extended as an alternative to BLOKSH_SOURCED_BY
 	BLOKSH_SOURCED_BY="$(basename "${BASH_SOURCE[1]}")" # name of the file that sourced this file
 	if [[ $BLOKSH_SOURCED_BY ]]; then
+		_bloksh_clean_variables
 		_bloksh_msg debug "'$(basename "${BASH_SOURCE[0]}")' sourced by '$BLOKSH_SOURCED_BY'"
 		_bloksh_loop bloksh_source "$BLOKSH_SOURCED_BY" # source homonym file for each blok
 	fi
