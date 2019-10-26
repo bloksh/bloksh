@@ -42,7 +42,7 @@ source "$BATS_TEST_DIRNAME/../bloksh.bash" noop
 	run bloksh_source .install
 
 	[[ $status -eq 1 ]]
-	error_regex='^\[BLOKSH\]\[i_dont_exist\] Missing from filesystem'
+	error_regex='^\[i_dont_exist\] Missing from filesystem'
 	[[ ${lines[0]} =~ $error_regex ]]
 	[[ ${#lines[@]} -eq 1 ]]
 }

@@ -69,7 +69,7 @@ echo_blok_name () {
 	run _bloksh_loop false
 
 	[[ $status -eq 0 ]]
-	[[ $output = "[BLOKSH] Errors in bloks: example i_dont_exist" ]]
+	[[ $output = "[bloksh] Errors in bloks: example i_dont_exist" ]]
 }
 
 @test "loop: one existing blok and one missing - calling function on everyone" {

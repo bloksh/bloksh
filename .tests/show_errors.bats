@@ -15,7 +15,7 @@ source "$BATS_TEST_DIRNAME/../bloksh.bash" noop
 	BLOKSH_ERRORS=(one two three)
 	run _bloksh_show_errors
 	[[ $status -eq 0 ]]
-	[[ $output = "[BLOKSH] Errors in bloks: one two three" ]]
+	[[ $output = "[bloksh] Errors in bloks: one two three" ]]
 }
 
 @test "show_errors: clean on the second call" {

@@ -15,12 +15,12 @@ source "$BATS_TEST_DIRNAME/../bloksh.bash" noop
 	BLOKSH_DEBUG=yep
 	run _bloksh_msg debug "my debug message"
 	[[ $status -eq 0 ]]
-	[[ $output = "[BLOKSH] my debug message" ]]
+	[[ $output = "[bloksh] my debug message" ]]
 }
 
 @test "msg: prepend blok name if \$BLOKSH_NAME is set" {
 	BLOKSH_NAME=hellothere
 	run _bloksh_msg info "my info message"
 	[[ $status -eq 0 ]]
-	[[ $output = "[BLOKSH][hellothere] my info message" ]]
+	[[ $output = "[hellothere] my info message" ]]
 }

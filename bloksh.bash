@@ -17,12 +17,10 @@ _bloksh_msg () {
 			error) color='\e[1;31m';;
 		esac
 	fi
-	local name=
-	[[ $BLOKSH_NAME ]] && name="[$BLOKSH_NAME]"
 	if [[ $level = debug ]] && ! [[ $BLOKSH_DEBUG ]]; then
 		return 0
 	fi
-	printf "%b%s%b\n" "$color" "[BLOKSH]$name $*" "$color_reset" >&2
+	printf "%b%s%b\n" "$color" "[${BLOKSH_NAME:-bloksh}] $*" "$color_reset" >&2
 }
 
 _bloksh_show_errors () {
@@ -75,8 +73,7 @@ _bloksh_install_one () {
 	fi
 	[ -r "$BLOKSH_PATH/.install" ] || return 0
 	_bloksh_msg info 'Installing...'
-	(cd "$BLOKSH_PATH" && exec "$SHELL" .install) &&
-		_bloksh_msg info "Done"
+	(cd "$BLOKSH_PATH" && exec "$SHELL" .install)
 }
 
 bloksh_install () {
@@ -147,6 +144,7 @@ _bloksh_git_fetch () {
 
 _bloksh_git_update () {
 	# untested
+	_bloksh_msg info "Checking for updates..."
 	local repository="$1"
 	local name="$2"
 	local expected_branch="$3"
@@ -174,7 +172,6 @@ _bloksh_git_update () {
 				return 1
 			fi
 			if [[ $commits_behind -eq 0 ]]; then
-				_bloksh_msg info "No updates found"
 				return 3 # no updates
 			fi
 			if _bloksh_confirm "Update '$name' ($commits_behind commits)?"; then
@@ -225,7 +222,7 @@ _bloksh_confirm () {
 
 bloksh_restart () {
 	# untested
-	_bloksh_msg info "Starting a new shell..."
+	_bloksh_msg info "Restarting shell..."
 	exec "$SHELL"
 }
 
