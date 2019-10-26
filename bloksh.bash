@@ -119,9 +119,12 @@ _bloksh_git_fetch () {
 			if [[ $line =~ $ab_regex ]]; then
 				echo "${BASH_REMATCH[2]}" # commits behind
 				[[ ${BASH_REMATCH[1]} -gt 0 ]] && return 3 # local repository is ahead
+				remote_found=true
 			fi
 			[[ $line =~ $modification_regex ]] && return 4 # local modifications
-			true # no match, return 0 (but continue the loop)
+			( [[ $remote_found ]] || return 5 ) # not tracking a remote branch
+			# NOTE: We are setting exit code in a subshell as we need to continue the loop.
+			# This condition will be checked at every iteration,
 		done
 }
 
@@ -147,6 +150,10 @@ _bloksh_git_update () {
 			;;
 		4)
 			_bloksh_msg error "Refuse to update: working directory is not clean"
+			return 1
+			;;
+		5)
+			_bloksh_msg error "Unable to update: not tracking any remote branch"
 			return 1
 			;;
 		0)
