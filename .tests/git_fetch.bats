@@ -100,3 +100,13 @@ mock_git () {
 	[[ ${lines[1]} = '0' ]]
 	[[ ${#lines[@]} -eq 2 ]]
 }
+
+@test "git_fetch: remote is gone" {
+	mock_git gone
+
+	run _bloksh_git_fetch
+
+	[[ $status -eq 5 ]]
+	[[ ${lines[0]} = 'branch-name' ]]
+	[[ ${#lines[@]} -eq 1 ]]
+}
