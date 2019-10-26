@@ -124,7 +124,8 @@ _bloksh_git_fetch () {
 			[[ $line =~ $modification_regex ]] && return 4 # local modifications
 			( [[ $remote_found ]] || return 5 ) # not tracking a remote branch
 			# NOTE: We are setting exit code in a subshell as we need to continue the loop.
-			# This condition will be checked at every iteration,
+			# This condition will be checked at every iteration, the result will stick
+			# if no other return condition is met.
 		done
 }
 
