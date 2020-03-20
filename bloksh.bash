@@ -93,7 +93,7 @@ bloksh_install () {
 
 _bloksh_update_one () {
 	# untested
-	_bloksh_git_update "$BLOKSH_PATH" "$BLOKSH_NAME" "$BLOKSH_GIT_BRANCH"
+	_bloksh_git_update "$BLOKSH_PATH" "$BLOKSH_GIT_BRANCH"
 	local update_result=$?
 	case $update_result in
 		3) # no updates
@@ -133,8 +133,7 @@ _bloksh_git_update () {
 	# untested
 	_bloksh_msg info "Checking for updates..."
 	local repository="$1"
-	local name="$2"
-	local expected_branch="$3"
+	local expected_branch="$2"
 	if ! [[ -e $repository/.git ]]; then
 		_bloksh_msg info "Unable to update: not a git repository"
 		return
@@ -165,7 +164,7 @@ _bloksh_git_update () {
 			if [[ $commits_behind -eq 0 ]]; then
 				return 3 # no updates
 			fi
-			if _bloksh_confirm "Update '$name' ($commits_behind commits)?"; then
+			if _bloksh_confirm "Update '$BLOKSH_NAME' ($commits_behind commits)?"; then
 				#TODO: or maybe git -C "$repository" pull --rebase=false &&
 				git -C "$repository" reset --hard 'HEAD@{upstream}' &&
 				git -C "$repository" submodule update --init --recursive &&
@@ -180,7 +179,8 @@ _bloksh_git_update () {
 bloksh_update () {
 	# untested
 	_bloksh_clean_variables
-	_bloksh_git_update "$BLOKSH_ROOT" bloksh
+	BLOKSH_NAME=bloksh _bloksh_git_update "$BLOKSH_ROOT"
+	[[ -e $BLOKSH_SECRETS/.git ]] && BLOKSH_NAME=secrets _bloksh_git_update "$BLOKSH_SECRETS"
 	_bloksh_loop _bloksh_update_one
 	bloksh_restart
 }
