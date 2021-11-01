@@ -204,7 +204,12 @@ bloksh_source () {
 	_bloksh_msg debug "Sourcing '$path' if exists"
 	if [[ -r $path ]]; then
 		# shellcheck source=/dev/null
-		source "$path"
+		if [[ $BLOKSH_DEBUG ]]; then
+			time source "$path"
+			_bloksh_msg debug "Sourced '$path'"
+		else
+			source "$path"
+		fi
 	fi
 }
 
